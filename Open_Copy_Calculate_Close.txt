@@ -1,0 +1,84 @@
+Sub abc()
+
+Application.Calculation = xlCalculationAutomatic
+Application.ScreenUpdating = False
+Application.DisplayStatusBar = False
+Application.EnableEvents = False
+
+Dim x As Workbook
+Dim y As Workbook
+Dim z As Workbook
+Dim FName      As String
+Dim FPath      As String
+Dim LR As Long
+
+'## Open both workbooks first:
+Set x = Workbooks.Open("C:\B.csv")
+Set y = Workbooks.Open("C:\N.csv")
+Set t = Workbooks.Open("C:\WF.csv")
+Set z = Workbooks.Open("C:\P.xlsx")
+
+
+'Now, copy what you want from y:
+y.Sheets("N").Columns("A:D").Copy
+
+'Now, paste y to z worksheet:
+z.Sheets("Total").Range("A1").PasteSpecial
+Application.DisplayAlerts = False
+'Close y
+y.Close
+
+'Now, copy what you want from t:
+t.Sheets("WF").Columns("A:B").Copy
+
+'Now, paste t to z worksheet:
+z.Sheets("Total").Range("N1").PasteSpecial
+Application.DisplayAlerts = False
+'Close t
+t.Close
+
+
+'Now, copy what you want from x:
+x.Sheets("B").Columns("A").Copy
+
+'Now, paste x to z worksheet:
+z.Sheets("Total").Range("H1").PasteSpecial
+
+z.Save
+
+'Now, copy what you want from z:
+LR = z.Sheets("Total").Cells(z.Sheets("Total").Rows.Count, "H").End(xlUp).Row
+z.Sheets("Total").Range("I1:L" & LR).Copy
+x.Sheets("B").Range("Q1").PasteSpecial Paste:=xlPasteValues
+Application.CutCopyMode = False
+
+'Close z
+z.Close False
+
+    x.Sheets("B").Range("U1").Select
+    ActiveCell.FormulaR1C1 = "Value Sale PPD"
+    x.Sheets("B").Range("V1").Select
+    ActiveCell.FormulaR1C1 = "Purchase PPD"
+    x.Sheets("B").Range("U2").Select
+    ActiveCell.FormulaR1C1 = "=RC[-19]/(RC[-2]*100)"
+    x.Sheets("B").Range("V2").Select
+    ActiveCell.FormulaR1C1 = "=RC[-12]/(RC[-3]*100)"
+    x.Sheets("B").Range("U2:V2").Select
+    If LR > 2 Then
+    Selection.AutoFill Destination:=Range("U2:V" & LR)
+    Else
+    End If
+    x.Sheets("B").UsedRange.Copy
+    x.Sheets("B").Range("A1").PasteSpecial Paste:=xlPasteValues
+    x.Save
+    x.Sheets("B").UsedRange.Copy
+
+    FPath = "C:\Users\"
+    FName = ThisWorkbook.Sheets("Sheet1").Range("C4").Text & ".xlsx"
+    x.SaveAs Filename:=FPath & "\" & FName, FileFormat:=xlOpenXMLWorkbook
+
+Application.ScreenUpdating = True
+Application.DisplayStatusBar = True
+Application.EnableEvents = True
+MsgBox "Done"
+End Sub
